@@ -10,7 +10,8 @@ Reads:
   ~/Documents/TripSortDart/build/store/world.png  the planet
 Writes WebP and JPEG into tripsort/assets/img/.
 
-Run: python3 tools/tripsort-landing/assets.py
+Run: python3 tools/tripsort-landing/assets.py        (all of them)
+     python3 tools/tripsort-landing/assets.py hero   (only the hero scene's pieces)
 """
 import pathlib
 from PIL import Image
@@ -63,7 +64,42 @@ def main():
         save(Image.open(GAME / f'assets/icons/{art}.webp').convert('RGBA'), f'icons/{name}.webp', 128, quality=88)
     planet = Image.open(GAME / 'build/store/world.png').convert('RGBA')
     save(planet.crop(planet.getbbox()), 'icons/planet.webp', 128, quality=88)
+    hero_pieces()
+
+
+# The living hero's pieces (the scene at the top of index.html): the planet,
+# each tile alone (drawn by the same render test as hero tile <type>), the
+# clouds, and the plane's sheets cut down from the game's: 64 of its 128
+# headings (the page blends two neighbours, as the game does) at three
+# quarters of the size, and the propeller every other of its headings.
+HERO_TILES = ['autobusrojo', 'eiffel', 'gondolavenice', 'mascarazorrokyoto', 'globoluxor']
+
+
+def cells(sheet, size, per_row, picks, out_size, out_per_row=8):
+    """The cells [picks] of a sheet of [size] cells, [per_row] a row, in a new
+    sheet of [out_size] cells, [out_per_row] a row."""
+    (w, h), (ow, oh) = size, out_size
+    rows = -(-len(picks) // out_per_row)
+    out = Image.new('RGBA', (out_per_row * ow, rows * oh))
+    for i, n in enumerate(picks):
+        cell = sheet.crop((n % per_row * w, n // per_row * h, n % per_row * w + w, n // per_row * h + h))
+        out.paste(cell.resize(out_size, Image.LANCZOS), (i % out_per_row * ow, i // out_per_row * oh))
+    return out
+
+
+def hero_pieces():
+    save(Image.open(GAME / 'build/store/world.png').convert('RGBA'), 'hero/world.webp', 640, quality=84)
+    for t in HERO_TILES:
+        save(Image.open(ART / f'hero/tile_{t}.png').convert('RGBA'), f'hero/tile-{t}.webp', 260, quality=86)
+    for n in (1, 2, 3):
+        save(Image.open(GAME / f'assets/backdrops/cloud_{n}.webp').convert('RGBA'), f'hero/cloud-{n}.webp', 360, quality=86)
+    plane = Image.open(GAME / 'assets/backdrops/plane.webp').convert('RGBA')
+    save(cells(plane, (282, 182), 14, [2 * i for i in range(64)], (212, 137)), 'hero/plane.webp', quality=78)
+    # The game's propeller cell is heading * 2 + blade, for 64 headings.
+    prop = Image.open(GAME / 'assets/backdrops/plane_prop.webp').convert('RGBA')
+    save(cells(prop, (134, 136), 16, [4 * (i // 2) + i % 2 for i in range(64)], (100, 102)), 'hero/prop.webp', quality=80)
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    hero_pieces() if sys.argv[1:] == ['hero'] else main()

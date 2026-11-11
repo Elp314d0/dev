@@ -226,9 +226,57 @@ section { padding: 96px 0; position: relative; }
 .hero h1 { font-size: clamp(40px, 4.9vw, 64px); line-height: 1.08; margin: 22px 0 20px; letter-spacing: .005em; }
 .hero .sub { font-size: 19px; color: var(--ink-2); max-width: 34em; margin-bottom: 28px; }
 .hero .stores { margin-bottom: 20px; }
-.hero-art img { width: 100%; max-width: 620px; margin: 0 auto; animation: float 7s ease-in-out infinite; }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-@media (prefers-reduced-motion: reduce) { .hero-art img { animation: none; } }
+/* The hero: the game's home scene, alive. Every piece sits in the scene's
+   own units, 1200 x 1150 like the game's art: left is --x / 12 %, top is
+   --y / 11.5 %, a width --w / 12 %. The plane is drawn by the script at the
+   end of index.html: behind the planet on the far half of its round, in
+   front of it on the near half. */
+.scene { position: relative; width: 100%; max-width: 620px; margin: 0 auto; aspect-ratio: 1200 / 1150; }
+.scene > * { position: absolute; display: block; }
+/* A soft white light round the planet, and rays out of it turning slowly. */
+.scene-glow {
+  left: 10%; top: 13.26%; width: 80%; aspect-ratio: 1;
+  background: radial-gradient(circle closest-side, rgba(255, 255, 255, .55), rgba(255, 255, 255, .2) 45%, rgba(255, 255, 255, 0));
+}
+.scene-rays {
+  left: 4%; top: 7%; width: 92%; aspect-ratio: 1;
+  background: repeating-conic-gradient(rgba(255, 255, 255, .22) 0deg 10deg, rgba(255, 255, 255, 0) 10deg 20deg);
+  -webkit-mask: radial-gradient(circle closest-side, #000, transparent);
+  mask: radial-gradient(circle closest-side, #000, transparent);
+  animation: scene-spin 120s linear infinite;
+}
+.scene-world { left: 25%; top: 14.78%; width: 50%; height: auto; }
+.scene-plane { inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .8s ease; }
+.scene-plane.on { opacity: 1; }
+.scene-cloud {
+  left: calc(var(--x) / 12 * 1%); top: calc(var(--y) / 11.5 * 1%); width: calc(var(--w) / 12 * 1%); height: auto;
+  animation: scene-drift var(--t) ease-in-out var(--d) infinite;
+}
+/* A tile's picture is the tile with a clear margin of 20 round it (102 x 114
+   for a 62 x 74 tile), centred where the tile goes. */
+.scene-tile {
+  left: calc(var(--x) / 12 * 1%); top: calc(var(--y) / 11.5 * 1%); width: calc(var(--w) * 102 / 62 / 12 * 1%); height: auto;
+  transform: translate(-50%, -50%) rotate(calc(var(--turn) * 1deg));
+  animation: scene-float var(--t) ease-in-out var(--d) infinite;
+}
+.scene-spark {
+  left: calc(var(--x) / 12 * 1%); top: calc(var(--y) / 11.5 * 1%); width: calc(var(--s) / 12 * 1%); aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0Q57 43 100 50Q57 57 50 100Q43 57 0 50Q43 43 50 0Z' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, .8));
+  animation: scene-twinkle var(--t) ease-in-out var(--d) infinite;
+}
+@keyframes scene-float {
+  0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--turn) * 1deg)); }
+  50% { transform: translate(-50%, -57%) rotate(calc((var(--turn) + var(--sway)) * 1deg)); }
+}
+@keyframes scene-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(var(--dx)); } }
+@keyframes scene-twinkle {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(.55); opacity: .5; }
+}
+@keyframes scene-spin { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) { .scene > * { animation: none !important; } }
 .proof { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 8px; color: var(--ink); font-family: var(--display); font-size: 16px; font-weight: 500; }
 .proof > span { display: inline-flex; align-items: center; gap: 8px; }
 .proof > span::before {
@@ -242,7 +290,7 @@ section { padding: 96px 0; position: relative; }
   .hero .sub { margin-left: auto; margin-right: auto; }
   .hero .stores, .proof { justify-content: center; }
   .hero-art { order: -1; }
-  .hero-art img { max-width: 420px; }
+  .scene { max-width: 420px; }
 }
 
 /* ---------- Stats: porcelain tiles ---------- */

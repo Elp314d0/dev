@@ -33,7 +33,7 @@ Read `guides.json` for the slug, keyword, secondary keywords, titles and descrip
 
 - Store screenshots of version 2.0, 480x1043, in `../../assets/img/shots/`:
   `match-3-tiles.webp` "Match 3 Tiles!" (Paris board, Eiffel tiles in the tray) ·
-  `291-destinations.webp` "291 Destinations" (Your Trip, the travel album: postcards of Strasbourg and Paris, a city stamp) ·
+  `291-destinations.webp` "291 Destinations" (Your Trip, the travel album: postcards of Strasbourg and Paris, a Paris stamp) ·
   `travel-the-world.webp` "Travel the World" (home: the planet with its landmarks and the Level button) ·
   `train-your-brain.webp` "Train Your Brain" (Kyoto board, torii, fox masks, sushi) ·
   `relax-and-unwind.webp` "Relax & Unwind" (Santorini board) · `play-offline.webp` "Play Offline" (London board, Big Ben, double-decker bus).
@@ -66,8 +66,9 @@ Read `guides.json` for the slug, keyword, secondary keywords, titles and descrip
   (36 of them reach players in weekly batches from 1 to 22 December 2026.)
 - Each city has its own tiles: Paris has the Eiffel Tower, croissants and macarons; Kyoto torii gates and sushi;
   Rio Christ the Redeemer and toucans; Buenos Aires tango shoes and mate; London Big Ben and the double-decker bus.
-- Every level adds a piece to the city's postcard. Finishing a city adds its stamp to Your Trip, the travel album, then
-  the toy plane flies to the next stop across the map (you can tap to skip it). Home is a little planet with the plane
+- Every level adds a piece to the city's postcard. Finishing a city stamps your passport ("VISITED"; the passport is in
+  the Collection tab, with the landmarks) and adds the city's stamp to Your Trip, the travel album; then the toy plane
+  flies to the next stop across the map (you can tap to skip it). Home is a little planet with the plane
   flying around it, and a won level ends with a victory show of fireworks and raining coins.
 - 23 famous landmarks to collect, earned when you complete the destination where they stand: Eiffel Tower, Fushimi Inari Torii,
   Itsukushima Pagoda, Christ the Redeemer, Leaning Tower of Pisa, Colosseum, Chichen Itza, Statue of Liberty, Big Ben,

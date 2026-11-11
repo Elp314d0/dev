@@ -3,18 +3,25 @@
 #   python3 tools/tripsort-route/build.py
 #
 # Reads, from the Flutter game (~/Documents/TripSortDart):
-#   lib/domain/game_data.dart   destinations in play order, and the landmarks
-#   assets/map/route.json       where each stop sits on the game's map and how
-#                               the trip leaves it (fly, sail, drive, rail)
-#   assets/postcards, icons     postcards, landmark art and the vehicles
+#   lib/domain/game_data.dart   the first route's destinations in play order,
+#                               and the landmarks
+#   lib/domain/new_cities.dart  the cities added since (2.0), each after the
+#                               stop it follows, with its place on the map
+#   assets/map/route.json       where each first-route stop sits on the map
+#   assets/postcards, icons     postcards and landmark art
+#   build/store/plane/          the toy plane's large renders (made for the
+#                               store art, see test/render/store_header_render_test.dart)
 # and, from the design repo (~/Documents/TripSort):
-#   docs/route-stops.json       chapters and real coordinates
+#   docs/route-stops.json       chapters and real coordinates (a new city
+#                               takes the chapter of the stop before it, and
+#                               its coordinates come back from the map)
 #   assets/web/worldmap.js      the game's world map (land and borders)
 #
 # Writes tripsort/route/index.html, map.json and the images in img/.
 # A destination without a place on the map stops the build.
 import html
 import json
+import math
 import os
 import re
 import sys
@@ -40,30 +47,55 @@ if len(dests) != block.count('Destination('):
     sys.exit('Could not read every destination in game_data.dart')
 landmarks = [tuple(map(unq, m)) for m in re.findall(rf'Landmark\({S}, {S}, {S}, {S}, {S}, {S}\)', src)]
 
+# The cities added since: each one right after the stop it follows, in the
+# order the game puts them there (kFullRoute), with its place on the map.
+nsrc = open(os.path.join(GAME, 'lib/domain/new_cities.dart'), encoding='utf-8').read()
+Q = r"'((?:[^'\\]|\\.)*)'"
+added = [(after, (unq(sid), unq(city), unq(country)), float(x), float(y)) for after, sid, city, country, x, y in
+         re.findall(rf"NewCity\(\d+, {Q}, Destination\({Q}, {Q}, {Q}\), ([\d.]+), ([\d.]+),", nsrc)]
+if len(added) != len(re.findall(r'NewCity\(\d', nsrc)):
+    sys.exit('Could not read every new city in new_cities.dart')
+for after, d, _, _ in added:
+    dests.insert([o[0] for o in dests].index(after) + 1, d)
+
 route = json.load(open(os.path.join(GAME, 'assets/map/route.json'), encoding='utf-8'))
 geo = json.load(open(os.path.join(DESIGN, 'docs/route-stops.json'), encoding='utf-8'))
-missing = [d[0] for d in dests if d[0] not in route['stops'] or d[0] not in geo['stops']]
+place = {sid: tuple(xy[:2]) for sid, xy in route['stops'].items()}
+place.update({d[0]: (x, y) for _, d, x, y in added})
+missing = [d[0] for d in dests if d[0] not in place]
 if missing:
     sys.exit('No place on the map for: ' + ', '.join(missing))
 
-slug = lambda s: re.sub(r'[^a-z0-9]+', '_', s.lower()).strip('_')
+# The game's map is a Mercator one: x from the longitude, y from the
+# latitude's Mercator stretch, both at the same scale. Its height is fitted
+# on the stops whose real coordinates are known, and a new city's
+# coordinates come back from its place on the map.
+K = W / 360
+merc = lambda lat: math.degrees(math.log(math.tan(math.pi / 4 + math.radians(lat) / 2)))
+known = [(place[sid][1], g['lat']) for sid, g in geo['stops'].items() if sid in place]
+Y0 = sum(y + K * merc(lat) for y, lat in known) / len(known)
+def lat_lon(x, y):
+    lat = math.degrees(2 * math.atan(math.exp(math.radians((Y0 - y) / K))) - math.pi / 2)
+    return round(lat, 2), round((x - W / 2) / K, 2)
+
+# Chapters: a new city belongs to the chapter of the stop before it.
+ch_of = {}
+for i, d in enumerate(dests):
+    ch_of[d[0]] = geo['stops'][d[0]]['ch'] if d[0] in geo['stops'] else ch_of[dests[i - 1][0]]
 ch_order = []
 for d in dests:
-    c = geo['stops'][d[0]]['ch']
-    if c not in ch_order:
-        ch_order.append(c)
-chapters = []
-for c in ch_order:
-    en = geo['chapters'][c]
-    chapters.append({'en': en})
+    if ch_of[d[0]] not in ch_order:
+        ch_order.append(ch_of[d[0]])
+chapters = [{'en': geo['chapters'][c]} for c in ch_order]
 
 lm_by_place = {l[4]: l for l in landmarks}
 stops = []
 for i, (sid, city, country) in enumerate(dests):
-    x, y, mode = route['stops'][sid]
-    g = geo['stops'][sid]
+    x, y = place[sid]
+    lat, lon = (geo['stops'][sid]['lat'], geo['stops'][sid]['lon']) if sid in geo['stops'] else lat_lon(x, y)
+    # Every leg is flown by the toy plane since 2.0.
     s = {'n': i + 1, 'id': sid, 'en': city, 'cen': country,
-         'x': x, 'y': y, 'm': mode, 'ch': ch_order.index(g['ch']), 'lat': g['lat'], 'lon': g['lon']}
+         'x': x, 'y': y, 'm': 'fly', 'ch': ch_order.index(ch_of[sid]), 'lat': lat, 'lon': lon}
     if sid in lm_by_place:
         s['lm'] = lm_by_place[sid][0]
     stops.append(s)
@@ -73,10 +105,6 @@ for s in stops:
         if s['ch'] in seen:
             sys.exit(f"Chapter {chapters[s['ch']]['en']} is split at {s['en']}")
         seen.append(s['ch'])
-# The last stop's mode is the way home; there is no leg after it.
-legs = {m: 0 for m in ('fly', 'sail', 'drive', 'rail')}
-for s in stops[:-1]:
-    legs[s['m']] += 1
 countries = len({s['cen'] for s in stops})
 
 # ---------- The world map, simplified ----------
@@ -161,9 +189,26 @@ for sid in HERO:
     save(os.path.join(GAME, f'assets/postcards/{sid}.webp'), os.path.join(IMG, 'pc', f'{sid}-l.webp'), (480, 640), 78)
 for l in landmarks:
     save(os.path.join(GAME, f'assets/icons/{l[0]}.webp'), os.path.join(IMG, 'lm', f'{l[0]}.webp'), (220, 220), 80)
-VEH = {'fly': 'airplane', 'sail': 'ferry', 'drive': 'busamarillo', 'rail': 'train'}
-for m, name in VEH.items():
-    save(os.path.join(GAME, f'assets/icons/{name}.webp'), os.path.join(IMG, 'v', f'{m}.webp'), (160, 160), 85)
+# The toy plane, in eight headings (0 flies east, each next one turns 45
+# degrees to its left), each with its propeller, all cut to one frame so the
+# plane keeps its place as it turns. fly.webp is the plane flying east.
+PLANE = os.path.join(GAME, 'build/store/plane')
+frames = []
+for k in range(8):
+    im = Image.open(os.path.join(PLANE, f'plane_{2 * k:03d}.png')).convert('RGBA')
+    im.alpha_composite(Image.open(os.path.join(PLANE, f'prop_{2 * k:03d}_0.png')).convert('RGBA'))
+    frames.append(im)
+boxes = [im.getbbox() for im in frames]
+frame = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+for k, im in enumerate(frames):
+    im = im.crop(frame)
+    im.thumbnail((180, 180), Image.LANCZOS)
+    im.save(os.path.join(IMG, 'v', f'plane-{k}.webp'), 'WEBP', quality=86, method=6)
+    if k == 0:
+        im.save(os.path.join(IMG, 'v', 'fly.webp'), 'WEBP', quality=86, method=6)
+for gone in ('sail', 'drive', 'rail'):
+    if os.path.exists(os.path.join(IMG, 'v', f'{gone}.webp')):
+        os.remove(os.path.join(IMG, 'v', f'{gone}.webp'))
 
 # The social card: the game's map with the whole route and the title.
 def og_image():
@@ -194,7 +239,7 @@ def og_image():
             k = 0.0
             while k < L:
                 px, py = ax + (bx - ax) * k / L, ay + (by - ay) * k / L
-                dots.ellipse([px - 1.6, py - 1.6 + 1, px + 1.6, py + 1.6 + 1], fill=(20, 30, 70, 90))
+                dots.ellipse([px - 1.6, py - 1.6 + 1, px + 1.6, py + 1.6 + 1], fill=(3, 57, 63, 90))
                 dots.ellipse([px - 1.6, py - 1.6, px + 1.6, py + 1.6], fill=(255, 255, 255, 240))
                 k += 7
     im.paste(shade, (0, 0), shade)
@@ -207,7 +252,7 @@ def og_image():
     font = os.path.join(GAME, 'assets/fonts/Fredoka-Bold.ttf')
     f1, f2 = ImageFont.truetype(font, 58), ImageFont.truetype(os.path.join(GAME, 'assets/fonts/Fredoka-SemiBold.ttf'), 27)
     plate = Image.new('RGBA', im.size, (0, 0, 0, 0))
-    ImageDraw.Draw(plate).rounded_rectangle([28, 26, 700, 176], 28, fill=(18, 22, 48, 215))
+    ImageDraw.Draw(plate).rounded_rectangle([28, 26, 700, 176], 28, fill=(3, 57, 63, 225))
     im.paste(plate, (0, 0), plate)
     icon = Image.open(os.path.join(SITE, 'tripsort/assets/img/tripsort-icon.png')).convert('RGBA').resize((106, 106), Image.LANCZOS)
     mask = Image.new('L', icon.size, 0)
@@ -215,7 +260,7 @@ def og_image():
     im.paste(icon, (50, 48), mask)
     dr = ImageDraw.Draw(im)
     dr.text((176, 44), 'Around the world', font=f1, fill=(255, 255, 255))
-    dr.text((178, 120), f'Trip Sort · {len(stops)} stops · {len(stops) * LEVELS:,} levels', font=f2, fill=(255, 197, 49))
+    dr.text((178, 120), f'Trip Sort · {len(stops)} stops · {len(stops) * LEVELS:,} levels', font=f2, fill=(255, 201, 79))
     im.save(os.path.join(IMG, 'og-route.jpg'), 'JPEG', quality=86, optimize=True)
 
 og_image()
@@ -265,9 +310,6 @@ for l in sorted(landmarks, key=lambda l: stop_of[l[4]]['n']):
   </div>
 </article>''')
 
-vehicles = ''.join(f'''<div class="veh"><img src="img/v/{m}.webp" width="160" height="160" loading="lazy" alt="">
-  <b>{legs[m]}</b><span>{L({'fly': 'flights', 'sail': 'ferry crossings', 'drive': 'bus rides', 'rail': 'train rides'}[m])}</span></div>'''
-                   for m in ('fly', 'drive', 'rail', 'sail'))
 
 options = ''.join(f'<option value="{e(s["en"])}, {e(s["cen"])}"></option>' for s in stops)
 hero_fan = ''.join(f'<img src="img/pc/{sid}-l.webp" width="480" height="640" alt="Trip Sort postcard of {e(next(s["en"] for s in stops if s["id"] == sid))}">' for sid in HERO)
@@ -288,7 +330,6 @@ for k, v in {
     '__ITEMLIST__': json.dumps(itemlist, ensure_ascii=False, separators=(',', ':')),
     '__CHAPTERS__': '\n'.join(cards),
     '__LANDMARKS__': '\n'.join(lm_cards),
-    '__VEHICLES__': vehicles,
     '__OPTIONS_EN__': options,
     '__HERO_FAN__': hero_fan,
     '__N_STOPS__': str(len(stops)),
@@ -306,5 +347,5 @@ if left:
     sys.exit('Unfilled placeholders: ' + ', '.join(sorted(set(left))))
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(page)
 size = lambda p: os.path.getsize(os.path.join(OUT, p)) // 1024
-print(f"{len(stops)} stops, {len(chapters)} chapters, {len(landmarks)} landmarks, {countries} countries; legs {legs}")
+print(f"{len(stops)} stops ({len(added)} added since 2.0), {len(chapters)} chapters, {len(landmarks)} landmarks, {countries} countries, {len(stops) - 1} flights")
 print(f"index.html {size('index.html')} KB, map.json {size('map.json')} KB")

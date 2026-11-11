@@ -9,12 +9,12 @@
   <meta name="description" content="Follow the Trip Sort world route on the game's own map: __N_STOPS__ real destinations in __N_CHAPTERS__ chapters, from __FIRST_EN__ round the globe to __LAST_EN__, with every postcard, landmark, flight, ferry, bus and train.">
   <link rel="canonical" href="https://dezeo.lat/tripsort/route/">
   <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#8fd6ff">
+  <meta name="theme-color" content="#3FB1F2">
   <link rel="icon" type="image/png" href="../assets/img/tripsort-icon-180.png">
   <link rel="apple-touch-icon" href="../assets/img/tripsort-icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lilita+One&display=swap">
   <link rel="stylesheet" href="../assets/css/site.css">
   <link rel="preload" href="map.json" as="fetch" crossorigin>
   <meta property="og:type" content="website">
@@ -47,7 +47,7 @@
       { "@type": "Question", "name": "Where does the Trip Sort trip start and end?",
         "acceptedAnswer": { "@type": "Answer", "text": "It starts in __FIRST_EN__, Uruguay, goes round the whole world through __N_CHAPTERS__ chapters and ends in __LAST_EN__, back on the same side of the Atlantic, after __N_STOPS__ stops." } },
       { "@type": "Question", "name": "How many levels does each stop have?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Twelve. Each level paints a piece of the city's postcard; finish all twelve to complete it, stamp your passport and travel on by plane, ferry, bus or train. That makes __N_LEVELS__ levels in all." } },
+        "acceptedAnswer": { "@type": "Answer", "text": "Twelve. Each level paints a piece of the city's postcard; finish all twelve to complete it, stamp your passport and fly on to the next stop. That makes __N_LEVELS__ levels in all." } },
       { "@type": "Question", "name": "Is the route the same for every player?",
         "acceptedAnswer": { "@type": "Answer", "text": "Yes. Stops unlock in order, so this map always shows where your trip goes next." } },
       { "@type": "Question", "name": "Are the places real?",
@@ -59,16 +59,18 @@
   </script>
 <style>
 /* ---------- Route page ---------- */
+/* The roles of site.css: coral for the main action, petrol outlines and lips,
+   turquoise for what is on, porcelain cards, lime for progress, and the
+   game's red passport stamp. */
 .hero-route { padding: calc(var(--nav-h) + 48px) 0 24px; overflow: hidden; }
 .hero-route .hero-grid { grid-template-columns: 1.05fr 1fr; }
-.hero-route h1 { font-size: clamp(40px, 5vw, 66px); margin: 18px 0 16px; }
-.hero-route h1 .accent { color: var(--sun); text-shadow: 0 3px 0 #c97a00; }
+.hero-route h1 { font-size: clamp(38px, 4.4vw, 60px); line-height: 1.08; margin: 22px 0 18px; }
 .hero-route .sub { font-size: 19px; color: var(--ink-2); max-width: 34em; margin-bottom: 26px; }
-.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
 .postfan { position: relative; height: 430px; max-width: 560px; margin: 0 auto; width: 100%; }
 .postfan img {
   position: absolute; top: 50%; left: 50%; width: 46%; max-width: 250px; border-radius: 16px;
-  border: 6px solid #fff; box-shadow: 0 18px 40px rgba(27, 37, 86, .25); background: #fff;
+  border: 6px solid #fff; box-shadow: 0 0 0 2px var(--tile-edge), 0 18px 36px rgba(3, 57, 63, .25); background: #fff;
   transform: translate(-50%, -50%) translateX(var(--dx)) translateY(var(--dy)) rotate(var(--r));
   animation: bob 7s ease-in-out infinite; animation-delay: var(--d);
 }
@@ -78,14 +80,16 @@
 .postfan img:nth-child(4) { --dx: 38%; --dy: -3%; --r: 8deg; --d: -2s; }
 .postfan img:nth-child(5) { --dx: 76%; --dy: 7%; --r: 15deg; --d: -4s; }
 @keyframes bob { 0%, 100% { margin-top: 0; } 50% { margin-top: -10px; } }
+/* The game's passport stamp: a red double ring on ivory. */
 .stamp {
   position: absolute; right: 2%; top: 4%; z-index: 3; width: 118px; height: 118px; border-radius: 50%;
   display: grid; place-items: center; text-align: center; transform: rotate(12deg);
-  font-family: var(--display); color: #e8412f; background: rgba(255, 255, 255, .86);
-  border: 4px dashed #e8412f; box-shadow: 0 8px 20px rgba(27, 37, 86, .18); line-height: 1.05;
+  font-family: var(--display); font-weight: 700; color: #D2382B; background: rgba(255, 248, 238, .92);
+  border: 4px solid #D2382B; box-shadow: 0 8px 20px rgba(3, 57, 63, .18); line-height: 1.05;
 }
+.stamp::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; border: 2px solid #D2382B; }
 .stamp b { display: block; font-size: 38px; }
-.stamp span { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.stamp span { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
 @media (max-width: 900px) {
   .hero-route .hero-grid { grid-template-columns: 1fr; text-align: center; }
   .hero-route .sub { margin-left: auto; margin-right: auto; }
@@ -98,73 +102,75 @@
 #map-section { padding-top: 56px; }
 .mapbox {
   position: relative; height: min(76vh, 700px); min-height: 420px; border-radius: 30px; overflow: hidden;
-  background: #6CC6EE; border: 6px solid #fff; box-shadow: 0 24px 60px rgba(27, 37, 86, .22);
+  background: #6CC6EE; border: 3px solid var(--petrol); box-shadow: 0 6px 0 var(--petrol), 0 24px 50px rgba(3, 57, 63, .22);
   user-select: none; -webkit-user-select: none;
 }
 .mapbox canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; display: block; }
 .mapbox canvas.dragging { cursor: grabbing; }
 .mapbox canvas.hot { cursor: pointer; }
-.vehicle { position: absolute; left: 0; top: 0; width: 64px; height: 64px; pointer-events: none; z-index: 3; will-change: transform; filter: drop-shadow(0 4px 4px rgba(20, 30, 70, .35)); }
-.vehicle img { width: 100%; height: 100%; transition: transform .25s ease; }
+.vehicle { position: absolute; left: 0; top: 0; width: 84px; height: 84px; pointer-events: none; z-index: 3; will-change: transform; filter: drop-shadow(0 5px 4px rgba(3, 57, 63, .3)); }
+.vehicle img { width: 100%; height: 100%; object-fit: contain; }
 .mapui { position: absolute; z-index: 4; display: flex; gap: 8px; align-items: center; }
 .panel {
-  background: rgba(255, 255, 255, .95); border-radius: 16px; box-shadow: 0 8px 24px rgba(20, 30, 70, .2);
+  background: rgba(255, 253, 248, .96); border-radius: 16px; border: 2px solid var(--line); box-shadow: 0 8px 24px rgba(3, 57, 63, .2);
   color: var(--ink); font-family: var(--display);
 }
 .search { top: 14px; left: 14px; right: 150px; max-width: 360px; }
 .search input {
-  width: 100%; border: 0; border-radius: 14px; padding: 12px 16px 12px 40px; font: 600 16px var(--display); color: var(--ink);
-  background: rgba(255, 255, 255, .95) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%231b2556' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px center;
-  box-shadow: 0 8px 24px rgba(20, 30, 70, .2); outline: none;
+  width: 100%; border: 2px solid var(--petrol-2); border-radius: 14px; padding: 11px 16px 11px 40px; font: 600 16px var(--display); color: var(--ink);
+  background: rgba(255, 253, 248, .97) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2303393f' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px center;
+  box-shadow: 0 3px 0 var(--petrol-2), 0 8px 24px rgba(3, 57, 63, .18); outline: none;
 }
-.search input:focus { box-shadow: 0 0 0 3px var(--sun), 0 8px 24px rgba(20, 30, 70, .2); }
+.search input:focus { box-shadow: 0 0 0 3px var(--lagoon-hi), 0 3px 0 var(--petrol-2), 0 8px 24px rgba(3, 57, 63, .18); }
 .zoom { top: 14px; right: 14px; flex-direction: column; }
 .mbtn {
-  display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 14px; cursor: pointer;
-  font: 700 22px var(--display); color: var(--ink); background: #fff; box-shadow: 0 4px 0 #c9d3e6, 0 8px 18px rgba(20, 30, 70, .18);
+  display: grid; place-items: center; width: 44px; height: 44px; border: 2px solid var(--petrol-2); border-radius: 14px; cursor: pointer;
+  font: 700 22px var(--display); color: var(--petrol); background: linear-gradient(180deg, #FFFFFF, var(--ivory));
+  box-shadow: 0 4px 0 var(--petrol-2), 0 8px 18px rgba(3, 57, 63, .18);
 }
-.mbtn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c9d3e6; }
+.mbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--petrol-2); }
 .mbtn svg { width: 20px; height: 20px; }
 .trip { left: 14px; right: 14px; bottom: 14px; padding: 8px; flex-wrap: wrap; }
 .tbtn {
-  border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer; white-space: nowrap;
-  font: 700 15px var(--display); color: #fff; background: var(--grad); box-shadow: 0 4px 0 #c43a64;
+  border: 2px solid var(--petrol); border-radius: 12px; padding: 9px 16px; cursor: pointer; white-space: nowrap;
+  font: 600 15px var(--display); color: #fff; background: var(--coral-grad); text-shadow: 0 1px 0 var(--coral-lip);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .4), 0 4px 0 var(--petrol);
 }
-.tbtn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c43a64; }
-.tbtn.ghost { background: #eef3fb; color: var(--ink); box-shadow: 0 4px 0 #c9d3e6; }
-.tbtn.on { background: var(--sun); color: var(--ink); box-shadow: 0 4px 0 #c97a00; }
+.tbtn:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .4), 0 1px 0 var(--petrol); }
+.tbtn.ghost { background: linear-gradient(180deg, #FFFFFF, var(--ivory)); color: var(--ink); text-shadow: none; border-color: var(--petrol-2); box-shadow: 0 4px 0 var(--petrol-2); }
+.tbtn.on { background: var(--lagoon-grad); color: #fff; text-shadow: 0 1px 0 var(--petrol); border-color: var(--petrol); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .35), 0 4px 0 var(--petrol); }
 .where { flex: 1 1 200px; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 0 6px; }
-.where img { width: 34px; height: 34px; flex: none; }
+.where img { width: 46px; height: 34px; object-fit: contain; flex: none; }
 .where .txt { min-width: 0; display: grid; }
 .where b { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .where small { font: 600 12.5px var(--sans); color: var(--muted); }
-.progress { flex-basis: 100%; height: 6px; border-radius: 3px; background: #e6ecf6; overflow: hidden; margin: 2px 4px 0; }
-.progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffc531, #ff8a3d); border-radius: 3px; }
+.progress { flex-basis: 100%; height: 7px; border-radius: 4px; background: rgba(3, 57, 63, .12); overflow: hidden; margin: 2px 4px 0; }
+.progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--lime-hi), var(--lime)); border-radius: 4px; }
 .chsel { top: 70px; left: 50%; transform: translateX(-50%); padding: 6px 6px 6px 16px; font-weight: 600; white-space: nowrap; display: none; }
 .chsel.show { display: flex; }
-.chsel button { border: 0; background: #eef3fb; border-radius: 10px; padding: 6px 10px; cursor: pointer; font: 700 14px var(--display); color: var(--ink); }
+.chsel button { border: 0; background: var(--ivory); border-radius: 10px; padding: 6px 10px; cursor: pointer; font: 700 14px var(--display); color: var(--petrol); }
 .card {
   position: absolute; z-index: 5; right: 72px; top: 14px; width: 280px; padding: 12px; display: none;
   max-height: calc(100% - 118px); overflow: auto;
 }
 .card.show { display: block; animation: pop .25s ease; }
 @keyframes pop { from { transform: scale(.94); opacity: 0; } }
-.card .pc { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: #eef3fb; }
-.card .x { position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; background: rgba(255, 255, 255, .92); font: 700 18px var(--display); color: var(--ink); box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
-.card .no { font: 600 12px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--pink); margin-top: 10px; }
+.card .pc { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: var(--porcelain); }
+.card .x { position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; background: rgba(255, 255, 255, .94); font: 700 18px var(--display); color: var(--petrol); box-shadow: 0 2px 8px rgba(3, 30, 34, .25); }
+.card .no { font: 600 12px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--link); margin-top: 10px; }
 .card h3 { font-size: 24px; line-height: 1.1; margin: 2px 0; }
 .card .ct { color: var(--muted); font: 600 14px var(--sans); }
 .card dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin-top: 10px; font: 14px var(--sans); }
 .card dt { color: var(--muted); }
 .card dd { font-weight: 600; display: flex; align-items: center; gap: 6px; }
-.card dd img { width: 26px; height: 26px; }
-.card .lmrow { display: flex; gap: 10px; align-items: center; margin-top: 10px; padding: 8px; border-radius: 12px; background: #fff8e8; border: 1px solid #ffe2a0; font: 600 14px var(--sans); }
+.card dd img { width: 34px; height: 26px; object-fit: contain; }
+.card .lmrow { display: flex; gap: 10px; align-items: center; margin-top: 10px; padding: 8px; border-radius: 12px; background: var(--porcelain); border: 1.5px solid var(--tile-edge); font: 600 14px var(--sans); }
 .card .lmrow img { width: 46px; height: 46px; }
 .card .nav { display: flex; gap: 8px; margin-top: 12px; }
 .card .nav button { flex: 1; }
-.maphint { text-align: center; color: var(--muted); font-size: 15px; margin-top: 16px; }
+.maphint { text-align: center; color: var(--muted); font-size: 15px; margin-top: 18px; }
 @media (max-width: 640px) {
-  .mapbox { height: 74vh; min-height: 460px; border-radius: 22px; border-width: 4px; }
+  .mapbox { height: 74vh; min-height: 460px; border-radius: 22px; }
   .search { right: 66px; }
   .card { left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; max-height: 70%; display: none; }
   .card.show { display: grid; grid-template-columns: 96px 1fr; gap: 0 12px; align-items: start; }
@@ -172,55 +178,59 @@
   .card .no { margin-top: 0; }
   .card .x { top: 8px; right: 8px; }
   .card .lmrow, .card .nav, .card dl { grid-column: 1 / -1; }
-  .vehicle { width: 52px; height: 52px; }
+  .vehicle { width: 64px; height: 64px; }
   .where b { font-size: 14px; }
 }
 
-.vehicles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-.veh { background: rgba(255, 255, 255, .8); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 16px 22px; text-align: center; }
-.veh img { width: 96px; height: 96px; margin: 0 auto 6px; }
-.veh b { display: block; font-family: var(--display); font-size: 40px; line-height: 1; }
-.veh span { color: var(--muted); font-size: 15px; }
-@media (max-width: 760px) { .vehicles { grid-template-columns: repeat(2, 1fr); } }
+/* How you get there: the toy plane on its dotted route. */
+.flights { display: grid; place-items: center; }
+.flights img { width: min(560px, 100%); }
 
-.chapters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: start; }
-.chapter { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(27, 37, 86, .07); overflow: hidden; scroll-margin-top: calc(var(--nav-h) + 12px); }
-.fan { position: relative; height: 170px; background: linear-gradient(180deg, #8fd6ff, #cdeeff); overflow: hidden; }
-.fan img { position: absolute; bottom: -34px; width: 104px; border-radius: 9px; border: 4px solid #fff; box-shadow: 0 8px 18px rgba(27, 37, 86, .22); transition: transform .25s ease; }
+.chapters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+.chapter {
+  background: var(--card); border: 2px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  box-shadow: 0 6px 0 rgba(3, 57, 63, .1), 0 18px 32px rgba(3, 57, 63, .1); scroll-margin-top: calc(var(--nav-h) + 12px);
+}
+.fan { position: relative; height: 170px; background: linear-gradient(180deg, var(--sky-1), var(--sky-3)); overflow: hidden; }
+.fan img { position: absolute; bottom: -34px; width: 104px; border-radius: 9px; border: 4px solid #fff; box-shadow: 0 8px 18px rgba(3, 57, 63, .22); transition: transform .25s ease; }
 .fan img:nth-child(1) { left: 8%; transform: rotate(-12deg); }
 .fan img:nth-child(2) { left: 30%; transform: rotate(-4deg); bottom: -24px; }
 .fan img:nth-child(3) { left: 52%; transform: rotate(5deg); bottom: -28px; }
 .fan img:nth-child(4) { left: 72%; transform: rotate(13deg); bottom: -38px; }
 .chapter:hover .fan img { transform: rotate(0) translateY(-8px); }
 .ch-body { padding: 18px 20px 20px; }
-.ch-no { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--pink); }
+.ch-no { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--lagoon-lo); }
 .chapter h3 { font-size: 24px; margin: 2px 0 6px; }
 .ch-meta { color: var(--muted); font-size: 15px; }
 .ch-ends { font-weight: 600; color: var(--ink-2); font-size: 15px; margin-top: 2px; }
 .ch-actions { margin: 14px 0 6px; }
 .chip {
-  border: 0; cursor: pointer; border-radius: 999px; padding: 9px 16px; font: 700 14px var(--display); color: var(--ink);
-  background: #fff8e8; box-shadow: inset 0 0 0 2px var(--sun), 0 3px 0 #e2b23c;
+  border: 2px solid var(--petrol-2); cursor: pointer; border-radius: 999px; padding: 8px 16px; font: 600 15px var(--display); color: var(--ink);
+  background: linear-gradient(180deg, #FFFFFF, var(--ivory)); box-shadow: 0 3px 0 var(--petrol-2);
 }
-.chip:hover { background: var(--sun); }
+.chip:hover { background: var(--lagoon-grad); color: #fff; }
+.chip:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--petrol-2); }
 .chapter details { margin-top: 6px; }
-.chapter summary { cursor: pointer; font-weight: 600; color: var(--ink-2); font-size: 15px; padding: 6px 0; }
+.chapter summary { cursor: pointer; font-family: var(--display); font-weight: 600; color: var(--ink-2); font-size: 15px; padding: 6px 0; }
 .stoplist { list-style: none; display: grid; gap: 2px; margin-top: 6px; max-height: 340px; overflow: auto; }
 .stoplist button {
   width: 100%; display: grid; grid-template-columns: 2.4em 1fr auto; gap: 8px; align-items: baseline; text-align: left;
   border: 0; background: none; padding: 6px 6px; border-radius: 10px; cursor: pointer; font: 15px var(--sans); color: var(--ink);
 }
-.stoplist button:hover { background: #eef6ff; }
+.stoplist button:hover { background: var(--porcelain); }
 .stoplist .no { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
 .stoplist .nm small { color: var(--muted); margin-left: 6px; }
 .stoplist .lv { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (max-width: 1000px) { .chapters { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .chapters { grid-template-columns: 1fr; } }
 
-.lms { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-.lm { display: grid; grid-template-columns: 112px 1fr; gap: 18px; align-items: start; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: 0 10px 30px rgba(27, 37, 86, .07); }
-.lm img { width: 112px; height: 112px; border-radius: 22px; background: linear-gradient(180deg, #8fd6ff, #fff4e3); padding: 8px; }
-.lm .lm-stop { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--pink); }
+.lms { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.lm {
+  display: grid; grid-template-columns: 112px 1fr; gap: 18px; align-items: start; background: var(--card); border: 2px solid var(--line);
+  border-radius: var(--radius); padding: 18px; box-shadow: 0 6px 0 rgba(3, 57, 63, .1), 0 18px 32px rgba(3, 57, 63, .1);
+}
+.lm img { width: 112px; height: 112px; border-radius: 22px; background: linear-gradient(180deg, var(--sky-2), var(--porcelain)); padding: 8px; }
+.lm .lm-stop { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--lagoon-lo); }
 .lm h3 { font-size: 22px; margin: 2px 0 6px; }
 .lm p { color: var(--ink-2); font-size: 15px; line-height: 1.55; }
 .lm .chip { margin-top: 12px; }
@@ -234,8 +244,8 @@
 <header class="site-header">
   <div class="container">
     <a class="brand" href="../">
-      <img src="../assets/img/tripsort-icon-64.webp" alt="Trip Sort app icon" width="32" height="32">
-      Trip Sort
+      <img src="../assets/img/tripsort-icon-64.webp" alt="Trip Sort app icon" width="34" height="34">
+      <span>Trip <span class="sort">Sort</span></span>
     </a>
     <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true">
     <nav class="site-nav" aria-label="Main">
@@ -254,12 +264,12 @@
   <section class="hero-route">
     <div class="container hero-grid">
       <div>
-        <span class="eyebrow">✈️ <span>The Trip Sort world route</span></span>
-        <h1><span>Around the world in <span class="accent">__N_STOPS__</span> stops</span></h1>
-        <p class="sub"><span>Every Trip Sort level moves you along one real route. It starts in __FIRST_EN__, crosses every continent by plane, ferry, bus and train, and ends in __LAST_EN__. Here is the whole trip, stop by stop, on the game's own map.</span></p>
+        <span class="eyebrow"><span class="chip">__N_STOPS__ STOPS</span><span>The Trip Sort world route</span></span>
+        <h1 class="sticker" data-text="Around the world in __N_STOPS__ stops">Around the world in <span class="key">__N_STOPS__ stops</span></h1>
+        <p class="sub">Every Trip Sort level moves you along one real route. It starts in __FIRST_EN__, flies across every continent and ends in __LAST_EN__. Here is the whole trip, stop by stop, on the game's own map.</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#map-section"><span>Watch the trip</span></a>
-          <a class="btn btn-ghost" href="#chapters"><span>See the 20 chapters</span></a>
+          <a class="btn btn-primary" href="#map-section">Watch the trip</a>
+          <a class="btn btn-ghost" href="#chapters">See the __N_CHAPTERS__ chapters</a>
         </div>
       </div>
       <div class="postfan">
@@ -271,10 +281,10 @@
 
   <section class="stats">
     <div class="container stats-row">
-      <div class="stat"><b>__N_STOPS__</b><span>destinations</span></div>
-      <div class="stat"><b>__N_CHAPTERS__</b><span>chapters</span></div>
-      <div class="stat"><b>__N_LEVELS__</b><span>levels</span></div>
-      <div class="stat"><b>__N_LANDMARKS__</b><span>landmarks</span></div>
+      <div class="stat"><b class="sticker" data-text="__N_STOPS__">__N_STOPS__</b><span>destinations</span></div>
+      <div class="stat"><b class="sticker" data-text="__N_CHAPTERS__">__N_CHAPTERS__</b><span>chapters</span></div>
+      <div class="stat"><b class="sticker" data-text="__N_LEVELS__">__N_LEVELS__</b><span>levels</span></div>
+      <div class="stat"><b class="sticker" data-text="__N_LANDMARKS__">__N_LANDMARKS__</b><span>landmarks</span></div>
     </div>
   </section>
 
@@ -283,7 +293,7 @@
       <div class="section-head">
         <p class="kicker"><span>The map</span></p>
         <h2><span>Follow the trip</span></h2>
-        <p><span>The traveler goes round the route on its own, with the same vehicle the game uses for every leg. Drag and zoom the map, search for a city, or tap any stop to see its postcard.</span></p>
+        <p><span>The traveler goes round the route on its own, in the game's own toy plane. Drag and zoom the map, search for a city, or tap any stop to see its postcard.</span></p>
       </div>
       <div class="mapbox" id="mapbox">
         <canvas id="mapcanvas" role="img" aria-label="Map of the Trip Sort route"></canvas>
@@ -313,11 +323,11 @@
   <section id="travel" style="padding-top: 24px">
     <div class="container">
       <div class="section-head">
-        <p class="kicker"><span>How you get there</span></p>
-        <h2><span>__N_LEGS__ trips between stops</span></h2>
-        <p><span>After the twelfth level of a city, a little trip takes you to the next one. Short hops go by bus or train, islands by ferry, and the long ones by plane.</span></p>
+        <p class="kicker">How you get there</p>
+        <h2>__N_LEGS__ flights between stops</h2>
+        <p>After the twelfth level of a city, your toy plane flies you to the next one, across the game's own map. Tap to skip the flight whenever you like.</p>
       </div>
-      <div class="vehicles">__VEHICLES__</div>
+      <div class="flights"><img src="../assets/img/plane-route.webp" width="900" height="640" loading="lazy" alt="The Trip Sort toy plane flying a dotted route to the next stop"></div>
     </div>
   </section>
 
@@ -357,7 +367,7 @@ __LANDMARKS__
         <details><summary><span>Where does the trip start and end?</span></summary>
           <p><span>It starts in __FIRST_EN__, Uruguay, goes round the whole world through __N_CHAPTERS__ chapters and ends in __LAST_EN__, back on the same side of the Atlantic, after __N_STOPS__ stops.</span></p></details>
         <details><summary><span>How many levels does each stop have?</span></summary>
-          <p><span>Twelve. Each level paints a piece of the city's postcard; finish all twelve to complete it, stamp your passport and travel on by plane, ferry, bus or train. That makes __N_LEVELS__ levels in all.</span></p></details>
+          <p><span>Twelve. Each level paints a piece of the city's postcard; finish all twelve to complete it, stamp your passport and fly on to the next stop. That makes __N_LEVELS__ levels in all.</span></p></details>
         <details><summary><span>Is the route the same for every player?</span></summary>
           <p><span>Yes. Stops unlock in order, so this map always shows where your trip goes next.</span></p></details>
         <details><summary><span>Are the places real?</span></summary>
@@ -374,8 +384,8 @@ __LANDMARKS__
       <div class="band">
         <div class="band-grid">
           <div>
-            <p class="kicker" style="color:#ffd76a"><span>Free on iPhone and Android</span></p>
-            <h2><span>Your trip starts in __FIRST_EN__.</span></h2>
+            <p class="kicker">Free on iPhone and Android</p>
+            <h2 class="sticker" data-text="Your trip starts in __FIRST_EN__.">Your trip starts in <span class="key">__FIRST_EN__.</span></h2>
             <p><span>Download Trip Sort and match your way round all __N_STOPS__ stops. No account, no sign-up, no Wi-Fi needed.</span></p>
             <div class="stores">
               <a class="store js-ios" href="https://apps.apple.com/app/trip-sort-triple-tile-match/id6818841022?pt=129004153&amp;ct=worldroute&amp;mt=8" rel="noopener">
@@ -389,7 +399,7 @@ __LANDMARKS__
             </div>
             <p class="micro"><span>Free to play with optional in-app purchases and ads. Remove Ads is a single purchase.</span></p>
           </div>
-          <div class="band-art"><img src="../assets/img/postcards.webp" width="1500" height="900" loading="lazy" alt="Trip Sort postcards from Mexico City, Rio de Janeiro, Paris, Rome and Santorini"></div>
+          <div class="band-art"><img src="../assets/img/hero-840.webp" width="840" height="805" loading="lazy" alt="The Trip Sort planet with famous landmarks, the toy plane and city tiles"></div>
         </div>
       </div>
     </div>
@@ -401,8 +411,8 @@ __LANDMARKS__
     <div class="footer-grid">
       <div>
         <a class="brand" href="../">
-          <img src="../assets/img/tripsort-icon-64.webp" alt="Trip Sort app icon" width="32" height="32">
-          Trip Sort
+          <img src="../assets/img/tripsort-icon-64.webp" alt="Trip Sort app icon" width="34" height="34">
+          <span>Trip <span class="sort">Sort</span></span>
         </a>
         <p><span>A relaxing triple tile match puzzle. Match 3 tiles, train your brain and travel the world, offline.</span></p>
         <div class="footer-social">
@@ -533,7 +543,7 @@ function draw() {
         if (Math.max(ax, bx) < -20 || Math.min(ax, bx) > cw + 20) continue;
         ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
       }
-      ctx.globalAlpha = alpha * .35; ctx.strokeStyle = '#141E46'; ctx.lineWidth = 4.5; ctx.setLineDash([.01, 10]);
+      ctx.globalAlpha = alpha * .35; ctx.strokeStyle = '#03393F'; ctx.lineWidth = 4.5; ctx.setLineDash([.01, 10]);
       ctx.translate(0, 1.2); ctx.stroke(); ctx.translate(0, -1.2);
       ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.stroke();
     }
@@ -563,8 +573,8 @@ function draw() {
       ctx.beginPath(); ctx.arc(x, y + 1.5, r + 1.5, 0, 7); ctx.fillStyle = 'rgba(20,30,70,.3)'; ctx.fill();
       ctx.beginPath(); ctx.arc(x, y, r, 0, 7);
       ctx.fillStyle = first ? '#E8412F' : last || chStart ? '#FFC531' : '#FFFFFF'; ctx.fill();
-      ctx.lineWidth = first || last || chStart ? 2.5 : 2; ctx.strokeStyle = first || last || chStart ? '#FFFFFF' : '#1B2556'; ctx.stroke();
-      if (i === card) { ctx.beginPath(); ctx.arc(x, y, r + 6, 0, 7); ctx.lineWidth = 3; ctx.strokeStyle = '#FF5C8A'; ctx.stroke(); }
+      ctx.lineWidth = first || last || chStart ? 2.5 : 2; ctx.strokeStyle = first || last || chStart ? '#FFFFFF' : '#03393F'; ctx.stroke();
+      if (i === card) { ctx.beginPath(); ctx.arc(x, y, r + 6, 0, 7); ctx.lineWidth = 3; ctx.strokeStyle = '#FF6E40'; ctx.stroke(); }
       // Landmarks show their art once the map is close enough.
       if (s.lm && big > 1.9 && lmImg[s.lm].complete) {
         const sz = Math.min(64, 22 + big * 4);
@@ -599,17 +609,17 @@ function draw() {
 }
 
 // ---------- The traveler ----------
-// One leg after the other, in the vehicle the game uses for it. The bus,
-// the train and the ferry face left in their art: they are mirrored to face
-// east. The plane points up and to the right: it turns along the leg.
+// One leg after the other, in the game's toy plane, as in the game's travel
+// map. Its art comes in eight headings: 0 flies east and each next one turns
+// 45 degrees to its left, so it shows the right side of the plane for the leg.
 const veh = document.getElementById('vehicle'), vehImg = document.getElementById('vehicleImg');
 let playing = !reduce, follow = false, pauseUntil = 0, lastT = 0, visible = true;
 const ease = t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
 function legPos() {
   const i = Math.min(leg, stops.length - 2), t = ease(legT);
   const ax = UX[i], ay = stops[i].y, bx = UX[i + 1], by = stops[i + 1].y;
-  // Flights lift into a gentle arc, the rest go straight.
-  const lift = stops[i].m === 'fly' ? Math.hypot(bx - ax, by - ay) * .18 : 0;
+  // Every leg is a flight, lifting into a gentle arc.
+  const lift = Math.hypot(bx - ax, by - ay) * .18;
   return [ax + (bx - ax) * t, ay + (by - ay) * t - Math.sin(Math.PI * t) * lift, ax, ay, bx, by];
 }
 function placeVehicle() {
@@ -623,11 +633,10 @@ function placeVehicle() {
 }
 function setLegArt() {
   const i = Math.min(leg, stops.length - 2), m = stops[i].m;
-  const src = `img/v/${m}.webp`;
-  if (!vehImg.src.endsWith(src)) vehImg.src = src;
-  document.getElementById('whereImg').src = src;
   const [, , ax, ay, bx, by] = legPos();
-  vehImg.style.transform = m === 'fly' ? `rotate(${Math.atan2(by - ay, bx - ax) * 180 / Math.PI + 45}deg)` : (bx > ax ? 'scaleX(-1)' : 'none');
+  const h = ((Math.round(Math.atan2(ay - by, bx - ax) / (Math.PI / 4)) % 8) + 8) % 8;
+  const src = `img/v/plane-${h}.webp`;
+  if (!vehImg.src.endsWith(src)) vehImg.src = src;
   const a = stops[i], b = stops[i + 1];
   document.getElementById('whereTxt').textContent = `${a.n}. ${name(a)} → ${name(b)}`;
   document.getElementById('whereSub').textContent = `${T.legOf(i + 1, stops.length - 1)} · ${T.by[m]}`;

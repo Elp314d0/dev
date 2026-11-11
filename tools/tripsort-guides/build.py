@@ -17,7 +17,8 @@ import re
 HERE = pathlib.Path(__file__).resolve().parent
 SITE = HERE.parent.parent / 'tripsort'
 BASE = 'https://dezeo.lat/tripsort/'
-UPDATED = '2026-10-12'
+PUBLISHED = '2026-10-12'
+UPDATED = '2026-11-10'
 APP_STORE = 'https://apps.apple.com/app/trip-sort-triple-tile-match/id6818841022'
 PLAY = 'https://play.google.com/store/apps/details?id=lat.dezeo.trip_sort'
 
@@ -38,8 +39,8 @@ def header(up):
     return f'''<header class="site-header">
   <div class="container">
     <a class="brand" href="{up}">
-      <img src="{up}assets/img/tripsort-icon-64.webp" alt="Trip Sort app icon" width="32" height="32">
-      Trip Sort
+      <img src="{up}assets/img/tripsort-icon-64.webp" alt="Trip Sort app icon" width="34" height="34">
+      <span>Trip <span class="sort">Sort</span></span>
     </a>
     <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true">
     <nav class="site-nav" aria-label="Main">
@@ -74,8 +75,8 @@ def footer(up):
     <div class="footer-grid">
       <div>
         <a class="brand" href="{up}">
-          <img src="{up}assets/img/tripsort-icon-64.webp" alt="Trip Sort app icon" width="32" height="32">
-          Trip Sort
+          <img src="{up}assets/img/tripsort-icon-64.webp" alt="Trip Sort app icon" width="34" height="34">
+          <span>Trip <span class="sort">Sort</span></span>
         </a>
         <p>{en('A relaxing triple tile match puzzle. Match 3 tiles, train your brain and travel the world, offline.')}</p>
         {SOCIAL}
@@ -119,7 +120,7 @@ def head(title, desc, url, image, up, extra=''):
   <meta name="description" content="{esc(desc)}">
   <link rel="canonical" href="{url}">
   <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#8fd6ff">
+  <meta name="theme-color" content="#3FB1F2">
   <link rel="icon" type="image/png" href="{up}assets/img/tripsort-icon-180.png">
   <link rel="apple-touch-icon" href="{up}assets/img/tripsort-icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -155,7 +156,7 @@ def guide_page(g, body):
         }, ensure_ascii=False, indent=2) + '\n  </script>'
     article_ld = json.dumps({
         '@context': 'https://schema.org', '@type': 'Article', 'headline': title, 'description': desc,
-        'image': image, 'inLanguage': 'en', 'datePublished': UPDATED + 'T12:00:00-03:00', 'dateModified': UPDATED + 'T12:00:00-03:00',
+        'image': image, 'inLanguage': 'en', 'datePublished': PUBLISHED + 'T12:00:00-03:00', 'dateModified': UPDATED + 'T12:00:00-03:00',
         'author': {'@type': 'Person', 'name': 'Nicolas Gula', 'url': 'https://dezeo.lat/'},
         'publisher': {'@type': 'Organization', 'name': 'dezeo', 'url': 'https://dezeo.lat/',
                       'logo': {'@type': 'ImageObject', 'url': BASE + 'assets/img/tripsort-icon.png'}},
@@ -230,7 +231,7 @@ def guides_index():
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
-  {head(title, desc, url, BASE + 'assets/img/og-tripsort.jpg', '../', extra)}
+  {head(title, desc, url, BASE + 'assets/img/og-trip-sort-2.jpg', '../', extra)}
 </head>
 <body>
 

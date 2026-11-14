@@ -8,10 +8,13 @@ Reads:
   ~/Downloads/tripsort/screenshots/en/     the store screenshots (iphone-0N.png)
   ~/Documents/TripSortDart/assets/icons/   button art (boosters, lives...)
   ~/Documents/TripSortDart/build/store/world.png  the planet
-Writes WebP and JPEG into tripsort/assets/img/.
+  ~/Documents/TripSortDart/build/icon/icon-1024.png  the app icon, from the
+      game's tool/app_icon/make_icon.py
+Writes WebP, JPEG and PNG into tripsort/assets/img/.
 
 Run: python3 tools/tripsort-landing/assets.py        (all of them)
      python3 tools/tripsort-landing/assets.py hero   (only the hero scene's pieces)
+     python3 tools/tripsort-landing/assets.py icon   (only the app icon)
 """
 import pathlib
 from PIL import Image
@@ -65,6 +68,16 @@ def main():
     planet = Image.open(GAME / 'build/store/world.png').convert('RGBA')
     save(planet.crop(planet.getbbox()), 'icons/planet.webp', 128, quality=88)
     hero_pieces()
+    app_icon()
+
+
+def app_icon():
+    """The app icon: the pages' favicon and Apple touch icon (180), the mark
+    in the header (64) and the one the pages' structured data name (256)."""
+    im = Image.open(GAME / 'build/icon/icon-1024.png').convert('RGB')
+    save(im, 'tripsort-icon.png', 256)
+    save(im.resize((180, 180), Image.LANCZOS).quantize(256), 'tripsort-icon-180.png')
+    save(im, 'tripsort-icon-64.webp', 64, quality=90)
 
 
 # The living hero's pieces (the scene at the top of index.html): the planet,
@@ -102,4 +115,4 @@ def hero_pieces():
 
 if __name__ == '__main__':
     import sys
-    hero_pieces() if sys.argv[1:] == ['hero'] else main()
+    {'hero': hero_pieces, 'icon': app_icon}.get(''.join(sys.argv[1:2]), main)()

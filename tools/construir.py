@@ -59,7 +59,7 @@ def tarjetas():
     plataformas = datos['platforms']
     e = html.escape
     piezas = []
-    for i, p in enumerate(datos['projects']):
+    for i, p in enumerate(visibles(datos)):
         # Nada de enlaces falsos: la landing tiene que existir de verdad
         for campo in ('name', 'description', 'url'):
             if not p.get(campo):
@@ -106,7 +106,7 @@ def tarjetas():
           <a class="show-cta" href="{e(p["url"])}">Explore {e(p["name"])}<span aria-hidden="true">→</span></a>
         </div>
       </article>''')
-    nombres = [p['name'] for p in datos['projects']]
+    nombres = [p['name'] for p in visibles(datos)]
     return ''.join(piezas), nombres
 
 
@@ -118,7 +118,7 @@ MARCA_CUANTAS = re.compile(r'(<!-- cuantas -->)(.*?)(<!-- /cuantas -->)', re.S)
 
 def cinta():
     e = html.escape
-    nombres = [p['name'] for p in datos()['projects']]
+    nombres = [p['name'] for p in visibles(datos())]
     una = ''.join(f'<span>{e(n)}</span><i aria-hidden="true">✦</i>' for n in nombres)
     return (f'\n      <div class="cinta-pista">'
             f'\n        <p class="cinta-tira">{una}</p>'
@@ -149,8 +149,15 @@ def datos():
     return json.loads((RAIZ / DATOS).read_text(encoding='utf-8'))
 
 
+def visibles(d):
+    """Los proyectos que se muestran en Work, la cinta y el pie. "hidden":
+    la landing sigue publicada (las tiendas enlazan su privacidad y soporte)
+    pero no aparece en ninguna lista del sitio."""
+    return [p for p in d['projects'] if not p.get('hidden')]
+
+
 def publicadas():
-    return [p for p in datos()['projects'] if not p.get('soon')]
+    return [p for p in visibles(datos()) if not p.get('soon')]
 
 
 def pie_apps(prefijo):

@@ -1,5 +1,5 @@
 {
-  "_leeme": "Fuente de verdad de la grilla de Work. tools/construir.py genera las tarjetas en projects.html desde aca. Despues de editar, correr: python3 tools/construir.py",
+  "_leeme": "Fuente de verdad de la grilla de Work. \"hidden\": true saca un proyecto de Work, la cinta y el pie, pero su landing sigue publicada (las tiendas enlazan su privacidad). tools/construir.py genera las tarjetas en projects.html desde aca. Despues de editar, correr: python3 tools/construir.py",
   "projects": [
     {
       "name": "Word Search",
@@ -31,6 +31,7 @@
     },
     {
       "name": "FaceCheck",
+      "hidden": true,
       "image": "assets/facecheck.jpg",
       "description": "Reads what your photo conveys: your score, your best feature and the points your next shot can gain. All on the iPhone.",
       "url": "facecheck/",
@@ -42,6 +43,7 @@
     },
     {
       "name": "Charlatan",
+      "hidden": true,
       "image": "assets/charlatan.jpg",
       "description": "Automatic subtitles for your videos, in any of 71 fonts. Everything runs on the iPhone.",
       "url": "charlatan/",
@@ -52,6 +54,7 @@
     },
     {
       "name": "Guardian Reader",
+      "hidden": true,
       "image": "assets/guardianreader.jpg",
       "description": "Kids earn their screen time by reading real books out loud, verified on the iPhone.",
       "url": "guardianreader/",
@@ -62,6 +65,7 @@
     },
     {
       "name": "Block&Read",
+      "hidden": true,
       "image": "assets/blockandread.jpg",
       "description": "Blocks your distracting apps until you read a few pages of a good book.",
       "url": "blockandread/",

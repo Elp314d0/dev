@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Get Trip Sort</title>
+<script>
+// The QR code's address: Android goes to Google Play, iPhone and iPad to the
+// App Store, everything else to the game's page.
+(function () {
+  var ua = navigator.userAgent || "";
+  var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var android = /Android/i.test(ua);
+  location.replace(android ? "https://play.google.com/store/apps/details?id=lat.dezeo.trip_sort&referrer=utm_source%3Dqr%26utm_medium%3Dqr%26utm_campaign%3Dqr" : ios ? "https://apps.apple.com/app/id6818841022?pt=129004153&ct=qr&mt=8" : "https://dezeo.lat/tripsort/");
+})();
+</script>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; text-align: center;
+         font: 600 18px/1.4 system-ui, sans-serif; color: #fff;
+         background: linear-gradient(#22c3b8, #0a7a7f); }
+  a { display: block; margin: 12px auto; padding: 14px 22px; max-width: 260px; border-radius: 16px;
+       background: #fff; color: #0a7a7f; text-decoration: none; }
+</style>
+</head>
+<body>
+<main>
+  <p>Trip Sort</p>
+  <a href="https://apps.apple.com/app/id6818841022?pt=129004153&ct=qr&mt=8">Download on the App Store</a>
+  <a href="https://play.google.com/store/apps/details?id=lat.dezeo.trip_sort&referrer=utm_source%3Dqr%26utm_medium%3Dqr%26utm_campaign%3Dqr">Get it on Google Play</a>
+</main>
+</body>
+</html>

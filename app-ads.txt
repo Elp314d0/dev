@@ -7,6 +7,10 @@ google.com, pub-9054006926076229, DIRECT, f08c47fec0942fa0
 # Liftoff Monetize (formerly Vungle), through AdMob mediation
 vungle.com, 6afcbe03efb36623c2608920, DIRECT, c107d686becd2d77
 
+# Meta Audience Network, through AdMob mediation: the business ID of the
+# "Dezeo" business in Meta's Monetization Manager.
+facebook.com, 1464357128360349, DIRECT, c3e20eee3f780d68
+
 # Unity Ads, through AdMob mediation: its line and the resellers of its
 # exchange, as the Unity Monetization dashboard lists them
 # (Settings > Organization > App-ads.txt). Refresh them from there.
